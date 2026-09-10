@@ -85,6 +85,12 @@ class BimanualDinnerEnv(gym.Env):
             self.model.mat_rgba[mat_id][:3] = np.random.uniform(0.2, 0.8, size=3)
         
     def step(self, action):
+        # UPGRADE: Dynamic Obstacle Oscillation (Collision Avoidance Test)
+        obs_jnt = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, "obstacle_slide")
+        if obs_jnt != -1:
+            qpos_adr = self.model.jnt_qposadr[obs_jnt]
+            self.data.qpos[qpos_adr] = 0.25 * np.sin(self.data.time * 2.5)
+
         mujoco.mj_step(self.model, self.data)
         observation = self._get_obs()
         

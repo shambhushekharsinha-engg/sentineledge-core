@@ -53,5 +53,11 @@
         <body name="arm_right_base" pos="0.4 -0.2 0.77">
             <geom type="cylinder" size="0.05 0.01" rgba="0 1 0 1"/>
         </body>
+
+        <!-- Dynamic Obstacle for Collision Avoidance Testing -->
+        <body name="dynamic_obstacle" pos="0 0.1 0.82">
+            <joint name="obstacle_slide" type="slide" axis="1 0 0" damping="0.1"/>
+            <geom name="obstacle_geom" type="sphere" size="0.04" rgba="1 0.2 0 1" mass="0.5"/>
+        </body>
     </worldbody>
 </mujoco>

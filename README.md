@@ -21,11 +21,14 @@ We engineered a complete **perception-to-action pipeline** that directly solves 
 
 Our solution leverages dual **SO-101** robotic arms in a MuJoCo simulation. We built a temporal VLA policy that retains multi-step task context, and heavily optimized it using **Intel OpenVINO** and **NNCF (Neural Network Compression Framework)**. By applying INT8 Post-Training Quantization, we successfully route the heavy multi-modal inference workload directly to the **Intel Core Ultra NPU and iGPU**, enabling real-time, low-latency bimanual manipulation at the edge.
 
-### 🌟 Key Innovations
-* **Extreme Domain Randomization:** Our MuJoCo environment actively randomizes object shapes, lighting, backgrounds, masses, and friction to guarantee the policy is robust to visual and physical perturbations.
-* **Temporal Context Memory:** Our VLA architecture is designed with a historical action-chunking buffer, ensuring the robot "remembers" its past states to successfully execute multi-step hand-offs.
-* **Intelligent Hardware Discovery:** Our benchmark engine automatically queries the Intel Core Ultra topology and prioritizes NPU execution for maximum energy efficiency, falling back to the iGPU or CPU automatically.
-* **Interactive UI Dashboard:** A built-in Gradio web application with a live OpenCV Heads-Up Display (HUD) allows users to type natural language commands and instantly watch the simulated robotic execution.
+### 🌟 Key Innovations & Enhancements
+* **🎙️ Speechmatics Voice-to-Action (Bonus Award):** Integrated the Speechmatics REST API directly into our Web UI. You can speak commands into your microphone, which are instantly transcribed and executed by the OpenVINO physical policy.
+* **🛡️ Dynamic Collision Avoidance:** Upgraded the MuJoCo simulation to include a dynamically oscillating physical obstacle on the table. The bimanual arms must actively reason around moving objects to complete hand-offs safely.
+* **🤖 ROS 2 Hardware Readiness:** Provided a `deployment/ros2_vla_node.py` wrapper, proving this OpenVINO policy can be deployed to a real physical robot running ROS 2 (Humble/Iron) using standard `JointTrajectory` topics.
+* **🎮 Teleoperation Dataset Collector:** Built an end-to-end imitation pipeline. Use `scripts/record_teleop.py` to drive the arms manually and record `.h5` expert demonstrations for Behavioral Cloning.
+* **Extreme Domain Randomization:** Actively randomizes object shapes, lighting, backgrounds, masses, and friction to guarantee the policy is robust to visual and physical perturbations.
+* **Temporal Context Memory:** Designed with a historical action-chunking buffer, ensuring the robot "remembers" past states to execute multi-step hand-offs.
+* **Intelligent Hardware Discovery:** Automatically queries the Intel Core Ultra topology and prioritizes NPU execution for maximum energy efficiency, gracefully falling back to iGPU or CPU.
 
 ---
 
@@ -53,11 +56,16 @@ graph TD
 
 We provide a highly deterministic Conda setup to ensure perfect reproducibility for the evaluation judges.
 
-### 1. Environment Setup
-Install the required dependencies via our `environment.yml`:
+### 1. Environment Setup (Local or Docker)
+**Option A: Conda (Recommended)**
 ```bash
 conda env create -f environment.yml
 conda activate intel-vla-challenge
+```
+**Option B: Docker (1-Click Run)**
+```bash
+docker build -t intel-vla-challenge .
+docker run -p 7860:7860 intel-vla-challenge
 ```
 
 ### 2. Interactive Simulation Dashboard

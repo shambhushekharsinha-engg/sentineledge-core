@@ -1,0 +1,23 @@
+name: intel-vla-challenge
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchvision
+  - numpy
+  - matplotlib
+  - pip
+  - pip:
+    - mujoco
+    - mujoco-python-viewer
+    - gymnasium
+    - openvino
+    - nncf
+    - lerobot
+    - opencv-python
+    - imageio
+    - imageio[ffmpeg]
+    - gradio

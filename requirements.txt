@@ -21,3 +21,5 @@ opencv-python
 matplotlib
 jupyterlab
 gradio
+requests
+h5py

@@ -1,0 +1,42 @@
+<mujoco>
+    <compiler angle="radian"/>
+    
+    <default>
+        <geom friction="1 0.005 0.0001" margin="0.001" condim="4"/>
+    </default>
+
+    <asset>
+        <!-- Placeholders for object materials/colors -->
+        <material name="mat_plate" rgba="0.9 0.9 0.9 1" specular="0.5" shininess="0.5"/>
+        <material name="mat_cup" rgba="0.2 0.5 0.8 1" specular="0.5" shininess="0.5"/>
+        <material name="mat_silverware" rgba="0.8 0.8 0.8 1" specular="1.0" shininess="0.8" metallic="1.0"/>
+    </asset>
+
+    <body>
+        <!-- Plate -->
+        <body name="plate" pos="0 0 0.8">
+            <freejoint/>
+            <geom name="plate_geom" type="cylinder" size="0.12 0.01" material="mat_plate" mass="0.5"/>
+        </body>
+
+        <!-- Cup -->
+        <body name="cup" pos="0.2 0.2 0.82">
+            <freejoint/>
+            <geom name="cup_geom" type="cylinder" size="0.04 0.05" material="mat_cup" mass="0.2"/>
+        </body>
+
+        <!-- Spoon -->
+        <body name="spoon" pos="-0.2 0.1 0.81">
+            <freejoint/>
+            <geom name="spoon_handle" type="box" size="0.01 0.06 0.005" pos="0 -0.04 0" material="mat_silverware" mass="0.05"/>
+            <geom name="spoon_head" type="ellipsoid" size="0.02 0.03 0.005" pos="0 0.03 0" material="mat_silverware" mass="0.05"/>
+        </body>
+
+        <!-- Fork -->
+        <body name="fork" pos="-0.25 0.1 0.81">
+            <freejoint/>
+            <geom name="fork_handle" type="box" size="0.01 0.06 0.005" pos="0 -0.04 0" material="mat_silverware" mass="0.05"/>
+            <geom name="fork_head" type="box" size="0.02 0.03 0.002" pos="0 0.03 0" material="mat_silverware" mass="0.05"/>
+        </body>
+    </body>
+</mujoco>

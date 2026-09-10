@@ -1,0 +1,23 @@
+# Intel Physical AI Challenge Dependencies
+# VLA / Multi-modal robotics
+lerobot
+transformers
+accelerate
+torch
+torchvision
+
+# Simulation
+mujoco
+mujoco-python-viewer
+gymnasium
+
+# Edge Optimization
+openvino
+nncf
+
+# Utilities
+numpy
+opencv-python
+matplotlib
+jupyterlab
+gradio

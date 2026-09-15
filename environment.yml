@@ -1,4 +1,4 @@
-name: intel-vla-challenge
+﻿name: intel-vla-challenge
 channels:
   - pytorch
   - conda-forge
@@ -21,3 +21,6 @@ dependencies:
     - imageio
     - imageio[ffmpeg]
     - gradio
+    - requests
+    - h5py
+    - pyyaml

@@ -3,6 +3,13 @@
 
 <div align="center">
 
+![SentinelEdge — Bimanual VLA on Intel Core Ultra](assets/cover.jpg)
+
+</div>
+
+
+<div align="center">
+
 ![Intel Core Ultra](https://img.shields.io/badge/Optimized_for-Intel_Core_Ultra-0068B5?style=for-the-badge&logo=intel)
 ![OpenVINO](https://img.shields.io/badge/Powered_by-OpenVINO_INT8-4A25AA?style=for-the-badge&logo=intel)
 ![MuJoCo](https://img.shields.io/badge/Simulation-MuJoCo-orange?style=for-the-badge)

@@ -23,11 +23,12 @@ def export_to_openvino(output_dir="inference/ir_model"):
     dummy_pixels = torch.randn(1, 3, 480, 640)
     dummy_language = torch.randn(1, 768)
     
-    # Convert to OpenVINO Model
+    print("Scripting model for stable OpenVINO conversion...")
+    scripted_model = torch.jit.script(model)
+    
     ov_model = ov.convert_model(
-        model, 
-        example_input=(dummy_pixels, dummy_language),
-        input=[(1, 3, 480, 640), (1, 768)]
+        scripted_model, 
+        example_input=(dummy_pixels, dummy_language)
     )
 
     # Save the base IR model (FP16/32)

@@ -106,15 +106,19 @@ class VLAPolicy(nn.Module):
         action_history: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         B = pixels.size(0)
+
         device = pixels.device
-
         if action_history is None:
-            action_history = torch.zeros(B, self.history_len * self.action_dim, device=device)
+            action_history = torch.zeros(B, self.history_len * self.action_dim, dtype=pixels.dtype, device=device)
 
-        # Encode each modality → (B, 1, feature_dim)
-        v = self.vision_encoder(pixels).unsqueeze(1)  + self.type_embed(torch.tensor([0], device=device))
-        l = self.language_proj(language_emb).unsqueeze(1) + self.type_embed(torch.tensor([1], device=device))
-        h = self.history_proj(action_history).unsqueeze(1)  + self.type_embed(torch.tensor([2], device=device))
+        # Encode each modality -> (B, 1, feature_dim)
+        idx_v = torch.tensor([0], dtype=torch.long, device=device)
+        idx_l = torch.tensor([1], dtype=torch.long, device=device)
+        idx_h = torch.tensor([2], dtype=torch.long, device=device)
+
+        v = self.vision_encoder(pixels).unsqueeze(1)  + self.type_embed(idx_v)
+        l = self.language_proj(language_emb).unsqueeze(1) + self.type_embed(idx_l)
+        h = self.history_proj(action_history).unsqueeze(1)  + self.type_embed(idx_h)
 
         # Fuse via cross-modal Transformer: (B, 3, feature_dim)
         seq = torch.cat([v, l, h], dim=1)

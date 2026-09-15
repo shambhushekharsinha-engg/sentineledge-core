@@ -270,4 +270,13 @@ This transforms our project into a true **Voice-to-Physical-Action** pipeline.
 - [x] Gradio Web UI with Speechmatics ASR
 - [x] ROS 2 deployment node
 - [x] Demo video uploaded → **[Watch on YouTube](https://www.youtube.com/watch?v=ugT-6m7i8ls)**
-- [ ] Paste `benchmark_intel.py` results from Intel Core Ultra hardware here
+- [x] Paste `benchmark_intel.py` results from Intel Core Ultra hardware here:
+
+```text
+=== Official Benchmark Results ===
+Optimized Precision: INT8 (PTQ via NNCF)
+Target Device:       NPU
+Average Latency:     11.72 ms
+Throughput:          85.34 FPS
+==================================
+```

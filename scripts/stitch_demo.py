@@ -89,7 +89,7 @@ def stitch_videos(input_dir: str, output_path: str, fps: int = 15,
         all_frames.extend(frames)
         print(f"{len(frames)} frames")
 
-    print(f"\nWriting combined video → {output_path}")
+    print(f"\nWriting combined video -> {output_path}")
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
     imageio.mimsave(output_path, all_frames, fps=fps, macro_block_size=None)
 

@@ -84,7 +84,7 @@ def render_hud(frame: np.ndarray, seed: int, step: int, max_steps: int,
 
     # Success flash
     if success:
-        cv2.putText(bgr, "✓ SUCCESS", (w // 2 - 70, h // 2),
+        cv2.putText(bgr, "*** SUCCESS ***", (w // 2 - 110, h // 2),
                     cv2.FONT_HERSHEY_DUPLEX, 1.4, (0, 255, 100), 3, cv2.LINE_AA)
 
     return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
@@ -113,7 +113,7 @@ def run_evaluation(
     total_start = time.time()
 
     print(f"\n{'='*60}")
-    print(f"  Intel Physical AI Challenge — Evaluation")
+    print(f"  Intel Physical AI Challenge -- Evaluation")
     print(f"  Seeds: {num_seeds}  |  Max Steps: {max_steps}")
     print(f"{'='*60}\n")
 
@@ -173,7 +173,7 @@ def run_evaluation(
             "avg_dist_right": float(np.mean(dists_r)) if dists_r else -1.0,
         })
 
-        status = "✅ SUCCESS" if success else "❌ FAIL"
+        status = "[OK]  SUCCESS" if success else "[FAIL]"
         print(f"         {status}  |  steps={steps_to_done}  |  reward={cumulative_r:.2f}")
 
         if record_video and frames and IMAGEIO_AVAILABLE:

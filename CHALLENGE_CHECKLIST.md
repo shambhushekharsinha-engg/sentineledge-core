@@ -1,4 +1,4 @@
-﻿# Intel Physical AI Challenge - Submission Checklist
+# Intel Physical AI Challenge - Submission Checklist
 
 ## Required Deliverables
 
@@ -28,7 +28,7 @@
 ## Pre-Submission Steps
 - [ ] Run `python inference/export_openvino.py` to generate INT8 model
 - [ ] Run `python inference/benchmark_intel.py` on Intel Core Ultra hardware
-- [ ] Run `python scripts/evaluate.py --seeds 10` to generate demo videos
-- [ ] Upload best demo video to YouTube / Hugging Face
-- [ ] Add video link to README.md
+- [x] Run `python scripts/evaluate.py --seeds 10` to generate demo videos
+- [x] Upload best demo video to YouTube / Hugging Face
+- [x] Add video link to README.md
 - [ ] Submit on lablab.ai portal

@@ -1,0 +1,50 @@
+﻿# ============================================================
+# task_config.yaml -- SentinelEdge Centralized Configuration
+# Intel Physical AI Challenge Hackathon
+# ============================================================
+
+simulation:
+  timestep: 0.002                  # Physics integration step (seconds)
+  render_width: 640
+  render_height: 480
+  fps: 30
+  max_steps_per_episode: 500
+  num_eval_seeds: 10
+
+  # Dynamic obstacle parameters
+  obstacle_oscillation_speed: 2.5  # rad/s
+  obstacle_amplitude: 0.25         # metres
+
+  # Domain randomization ranges
+  randomization:
+    position_noise: 0.04           # +/- metres on object spawn positions
+    mass_scale_min: 0.75
+    mass_scale_max: 1.25
+    friction_scale_min: 0.6
+    friction_scale_max: 1.4
+    shape_scale_min: 0.9
+    shape_scale_max: 1.1
+
+policy:
+  action_dim: 16                   # 8-DOF per arm x 2 arms
+  history_len: 4                   # Temporal context frames
+  vision_feature_dim: 256
+  language_embedding_dim: 768      # BERT-base / sentence-transformer dim
+  transformer_heads: 8
+  transformer_layers: 2
+
+training:
+  epochs: 10
+  batch_size: 16
+  learning_rate: 0.0001
+  save_dir: models/weights
+
+inference:
+  ir_model_dir: inference/ir_model
+  preferred_device: AUTO           # OpenVINO AUTO plugin selects best HW
+  benchmark_iterations: 100
+  warmup_iterations: 10
+
+speechmatics:
+  language: en
+  api_endpoint: https://asr.api.speechmatics.com/v2/jobs/

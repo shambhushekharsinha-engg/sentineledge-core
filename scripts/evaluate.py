@@ -24,6 +24,8 @@ import numpy as np
 import cv2
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from models.vla_policy import get_policy
+from models.action_filter import ActionFilter
 from simulation.env import BimanualDinnerEnv
 
 try:
@@ -122,6 +124,7 @@ def run_evaluation(
         obs, _  = env.reset(seed=seed, options=options)
 
         instruction   = obs["instruction"]
+        action_filter = ActionFilter(action_dim=16, alpha=0.3)
         frames        = []
         cumulative_r  = 0.0
         success       = False

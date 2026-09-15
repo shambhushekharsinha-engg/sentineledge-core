@@ -1,0 +1,67 @@
+{
+  "configById": {
+    "3D!18i966m": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 3.5,
+        "phi": 0.5,
+        "thetaOffset": 0.8,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 0.785
+      },
+      "scene": {
+        "transforms": {
+          "showLabel": false,
+          "axisScale": 0.1
+        }
+      },
+      "topics": {
+        "/left_arm/joint_trajectory": {
+          "visible": true,
+          "color": "#e20b0b"
+        },
+        "/right_arm/joint_trajectory": {
+          "visible": true,
+          "color": "#12c40c"
+        },
+        "/camera/color/image_raw": {
+          "visible": true
+        }
+      }
+    },
+    "Image!208q2n4": {
+      "topic": "/camera/color/image_raw"
+    },
+    "Plot!1a2b3c4": {
+      "title": "Joint Angles",
+      "paths": [
+        {
+          "value": "/left_arm/joint_trajectory.points[0].positions[0]",
+          "color": "#e20b0b"
+        },
+        {
+          "value": "/right_arm/joint_trajectory.points[0].positions[0]",
+          "color": "#12c40c"
+        }
+      ]
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": "3D!18i966m",
+    "second": {
+      "direction": "column",
+      "first": "Image!208q2n4",
+      "second": "Plot!1a2b3c4"
+    },
+    "splitPercentage": 60
+  }
+}

@@ -101,7 +101,19 @@ def simulate_instruction(instruction: str, audio_file, api_key: str):
         record_video=True,
         custom_instruction=final_instruction
     )
-    return final_instruction, video_path
+    
+    # Generate Robot Voice Response
+    tts_file = os.path.join(os.path.dirname(__file__), "data", "robot_response.mp3")
+    os.makedirs(os.path.dirname(tts_file), exist_ok=True)
+    try:
+        from gtts import gTTS
+        tts = gTTS(text=f"Command received. I will now {final_instruction}", lang="en", tld="com.au")
+        tts.save(tts_file)
+    except Exception as e:
+        print(f"[TTS Error] {e}")
+        tts_file = None
+        
+    return final_instruction, video_path, tts_file
 
 
 # ─── Gradio UI ─────────────────────────────────────────────────────────────────
@@ -171,11 +183,16 @@ with gr.Blocks(
                 label="📹 Bimanual Execution Demo (OpenVINO Inference)",
                 interactive=False
             )
+            robot_audio = gr.Audio(
+                label="🤖 Robot Voice Response",
+                interactive=False,
+                autoplay=True
+            )
 
     run_btn.click(
         fn=simulate_instruction,
         inputs=[instruction_input, audio_input, api_key],
-        outputs=[transcribed_text, output_video]
+        outputs=[transcribed_text, output_video, robot_audio]
     )
 
     gr.Markdown("""

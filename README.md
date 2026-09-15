@@ -64,29 +64,26 @@ A complete **perception-to-action pipeline** that tightly couples a Temporal VLA
 ---
 
 ## 🏗️ Architecture Workflow
+## 🤖 Architecture
 
 ```mermaid
 graph TD
-    A["🎙️ Voice / Text Command"] --> B["Speechmatics ASR"]
-    B --> C["Sentence Embedding"]
-    D["📷 Dual Cameras"] --> E["CNN Vision Encoder"]
-    F["🕹️ Joint State History"] --> G["History Encoder"]
-
-    C --> H["Cross-Modal Transformer"]
-    E --> H
-    G --> H
-
-    H --> I["Bimanual Action Head"]
-    I --> J["Left SO-101 Arm"]
-    I --> K["Right SO-101 Arm"]
-
-    J --> L["MuJoCo Physics"]
-    K --> L
-    L -->|"Next Observation"| D
-
-    H --> M["Intel OpenVINO INT8"]
-    M --> N["Core Ultra NPU / iGPU"]
+    A[Speechmatics / Text] -->|Instruction| B(Sentence Transformers)
+    C[RGB Camera] -->|Pixels| D(CNN Backbone)
+    B --> E[Multi-Modal Transformer]
+    D --> E
+    E --> F[Left Arm Head]
+    E --> G[Right Arm Head]
+    F --> H[Action Filter EMA]
+    G --> H[Action Filter EMA]
+    H --> I[(MuJoCo / ROS 2)]
+    I --> J[Robot Voice TTS]
 ```
+
+### 🏎️ Advanced Robotics Features
+- **Kinematic Action Smoothing:** Exponential Moving Average (EMA) Low-Pass Filter in `models/action_filter.py` protects real-world motors from jerky neural network outputs (Sim2Real readiness).
+- **Robot Voice Feedback:** Real-time Text-to-Speech (TTS) confirmation of executed actions in the Gradio dashboard.
+- **Foxglove Studio Telemetry:** Pre-configured `deployment/foxglove_layout.json` for professional 3D visualization, camera feeds, and joint trajectory plotting in ROS 2.
 
 ---
 

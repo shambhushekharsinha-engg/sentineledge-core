@@ -23,3 +23,5 @@ jupyterlab
 gradio
 requests
 h5py
+sentence-transformers
+pytest

@@ -1,4 +1,4 @@
-﻿name: CI - Intel Physical AI Challenge
+name: CI - Intel Physical AI Challenge
 
 on:
   push:
@@ -39,3 +39,15 @@ jobs:
 
       - name: Smoke test - Metrics Import
         run: python -c 'from scripts.metrics import MetricsLogger; print("Metrics import OK")'
+
+      - name: Smoke test - Language Encoder Import
+        run: python -c 'from models.language_encoder import encode_instruction; print("Language encoder import OK")'
+
+      - name: Smoke test - Reward FSM Import
+        run: python -c 'from simulation.reward import compute_reward, RewardState; print("Reward FSM import OK")'
+
+      - name: Smoke test - Action Filter Import
+        run: python -c 'from models.action_filter import ActionFilter; f = ActionFilter(16); print("Action filter import OK")'
+
+      - name: Run full pytest suite
+        run: python -m pytest tests/ -v --tb=short

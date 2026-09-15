@@ -59,31 +59,44 @@ A complete **perception-to-action pipeline** that tightly couples a Temporal VLA
 | 🤖 **ROS 2 Deployment Node** | Production-ready wrapper for real physical robot deployment |
 | 🐳 **Docker 1-Click Deploy** | `docker build + run` gives a working environment instantly |
 | ⚙️ **Centralized Config YAML** | All hyperparameters in `configs/task_config.yaml` |
-| ✅ **GitHub Actions CI** | Automated smoke tests on every push |
+| ✅ **39-Test pytest Suite** | Full unit test coverage across env, policy, reward FSM, and metrics |
+| 🏎️ **EMA Action Smoother** | Low-pass kinematic filter protects real motors from jerky NN outputs (Sim2Real) |
+| 📡 **Foxglove Studio Layout** | Pre-configured telemetry dashboard for 3D visualization + joint trajectory plotting |
 
 ---
 
-## 🏗️ Architecture Workflow
 ## 🤖 Architecture
 
 ```mermaid
 graph TD
-    A[Speechmatics / Text] -->|Instruction| B(Sentence Transformers)
-    C[RGB Camera] -->|Pixels| D(CNN Backbone)
-    B --> E[Multi-Modal Transformer]
-    D --> E
-    E --> F[Left Arm Head]
-    E --> G[Right Arm Head]
-    F --> H[Action Filter EMA]
-    G --> H[Action Filter EMA]
-    H --> I[(MuJoCo / ROS 2)]
-    I --> J[Robot Voice TTS]
+    A[Voice / Text Command] -->|Speechmatics ASR| B(Sentence Transformers 384-d)
+    C[RGB Camera 480x640] -->|Pixels| D(CNN Backbone 4-stage)
+    E[Joint History 64-d] -->|Action Buffer| F(History Encoder)
+    B --> G[Cross-Modal Transformer 4-layer]
+    D --> G
+    F --> G
+    G --> H[Left Arm Head 8-DOF]
+    G --> I[Right Arm Head 8-DOF]
+    H --> J[EMA Action Filter alpha=0.3]
+    I --> J
+    J --> K[(MuJoCo Physics / ROS 2)]
+    K -->|Observation| C
+    K --> L[Robot Voice TTS]
+    G --> M[OpenVINO INT8 NPU]
 ```
 
-### 🏎️ Advanced Robotics Features
-- **Kinematic Action Smoothing:** Exponential Moving Average (EMA) Low-Pass Filter in `models/action_filter.py` protects real-world motors from jerky neural network outputs (Sim2Real readiness).
-- **Robot Voice Feedback:** Real-time Text-to-Speech (TTS) confirmation of executed actions in the Gradio dashboard.
-- **Foxglove Studio Telemetry:** Pre-configured `deployment/foxglove_layout.json` for professional 3D visualization, camera feeds, and joint trajectory plotting in ROS 2.
+### 🔬 Multi-Stage Reward FSM (`simulation/reward.py`)
+
+The policy is trained with a **5-stage Finite State Machine** reward — not a simple distance check:
+
+```
+INIT → APPROACHING (+0.5) → GRASPING (+2.0) → LIFTING (+3.0) → PLACING (+4.0) → DONE (+10.0)
+```
+
+### 🏎️ Sim2Real Robotics Features
+- **EMA Kinematic Smoother** (`models/action_filter.py`): Exponential Moving Average Low-Pass Filter (α=0.3) prevents jerky motor commands that damage real Dynamixel actuators.
+- **Robot Voice Feedback**: gTTS speaks back "Command received. I will now..." to confirm execution.
+- **Foxglove Studio Dashboard** (`deployment/foxglove_layout.json`): Industry-standard telemetry viewer with 3D scene, camera feed panel, and live joint trajectory plots.
 
 ---
 
@@ -132,10 +145,12 @@ We implement **4 bimanual task variations** (see `simulation/task_suite.py`):
 
 ```text
 sentineledge-core/
-├── app.py                         # Gradio Web Dashboard (Speechmatics + OpenVINO)
+├── app.py                         # Gradio Web Dashboard (Speechmatics + OpenVINO + TTS)
 ├── Dockerfile                     # 1-click reproducible container
+├── Makefile                       # make install / test / eval / benchmark / app / docker-build
 ├── environment.yml                # Deterministic Conda environment (Python 3.10)
 ├── requirements.txt               # pip dependencies
+├── MODEL_CARD.md                  # HuggingFace-compatible model card with BibTeX
 ├── CHALLENGE_CHECKLIST.md         # Official submission checklist with scoring rubric
 ├── CONTRIBUTING.md                # Developer guide
 │
@@ -146,10 +161,13 @@ sentineledge-core/
 │   ├── env.py                     # Gymnasium env (6-axis randomization, obstacle physics)
 │   ├── scene.xml                  # MuJoCo world (table, drawer, dynamic obstacle, cameras)
 │   ├── objects.xml                # Dinnerware geometry definitions
+│   ├── reward.py                  # Multi-stage FSM reward (INIT→APPROACHING→GRASPING→PLACING→DONE)
 │   └── task_suite.py              # 4 bimanual task definitions
 │
 ├── models/
-│   └── vla_policy.py              # Temporal VLA: CNN + Cross-Modal Transformer + Bimanual heads
+│   ├── vla_policy.py              # Temporal VLA: CNN + Cross-Modal Transformer + Bimanual heads
+│   ├── language_encoder.py        # Real Sentence-Transformers embeddings (all-MiniLM-L6-v2)
+│   └── action_filter.py           # EMA Low-Pass Filter for Sim2Real kinematic smoothing
 │
 ├── scripts/
 │   ├── train_imitation.py         # BC training: HDF5/synthetic, AMP, cosine LR, val split
@@ -166,7 +184,18 @@ sentineledge-core/
 │   └── latency_profile.py         # p50/p95/p99 profiling + bar-chart + JSON report
 │
 ├── deployment/
-│   └── ros2_vla_node.py            # ROS 2 node for real physical robot deployment
+│   ├── ros2_vla_node.py           # ROS 2 node for real physical robot deployment
+│   └── foxglove_layout.json       # Foxglove Studio telemetry dashboard config
+│
+├── notebooks/
+│   ├── ablation_study.ipynb       # Quantitative ablation: randomization, precision, device, history
+│   └── README.md                  # Notebook guide
+│
+├── tests/
+│   ├── test_environment.py        # 7 environment tests (obs shapes, randomization, step types)
+│   ├── test_policy.py             # 8 VLA policy tests (shapes, NaN/Inf, determinism, language)
+│   ├── test_reward.py             # 6 FSM reward tests (transitions, shaped rewards, accumulation)
+│   └── test_metrics.py            # 18 metrics tests (log, aggregate, JSON/CSV export)
 │
 └── data/
     ├── videos/                    # Per-seed demo MP4s (demo_seed_0.mp4 ... demo_seed_9.mp4)
@@ -184,20 +213,35 @@ conda env create -f environment.yml
 conda activate intel-vla-challenge
 ```
 
-### Option B — Docker (1-Click)
+### Option B — pip
+```bash
+pip install -r requirements.txt
+```
+
+### Option C — Docker (1-Click)
 ```bash
 docker build -t intel-vla-challenge .
 docker run -p 7860:7860 intel-vla-challenge
 # Open http://localhost:7860
 ```
 
+### Option D — Makefile
+```bash
+make install   # Install all dependencies
+make test      # Run 39-test pytest suite
+make eval      # Run 10-seed evaluation
+make app       # Launch Gradio dashboard
+make benchmark # Intel Core Ultra NPU benchmark
+```
+
 ---
 
 ## ▶️ Running the Pipeline
 
-### Interactive Web Dashboard
+### Interactive Web Dashboard (with Voice & TTS)
 ```bash
 python app.py
+# Open http://localhost:7860 — speak a command, watch the robot execute it
 ```
 
 ### Generate Expert Dataset
@@ -216,8 +260,8 @@ python scripts/train_imitation.py --dataset data/bc_dataset.h5 --epochs 10
 
 ### Export & Optimize for Intel Core Ultra
 ```bash
-python inference/export_openvino.py        # INT8 PTQ export
-python inference/benchmark_intel.py        # Throughput benchmark
+python inference/export_openvino.py        # INT8 PTQ export via NNCF
+python inference/benchmark_intel.py        # NPU/iGPU/CPU throughput benchmark
 python inference/latency_profile.py        # p50/p95/p99 profiling
 ```
 
@@ -227,19 +271,24 @@ python scripts/evaluate.py --seeds 10
 python scripts/stitch_demo.py              # Stitch into one submission reel
 ```
 
+### Run Full Test Suite
+```bash
+python -m pytest tests/ -v                 # 39 tests across 4 files
+```
+
 ---
 
 ## 📊 Scoring Rubric Coverage
 
 | Category | Max Pts | Our Implementation |
-|----------|---------|--------------------|
-| Bimanual Task Completion | 25 | Dual SO-101 + hand-off detection + 4 task types + drawer manipulation |
-| Robustness & Generalization | 15 | 6-axis domain randomization (position, mass, friction, lighting, shape, background) |
-| VLA / Multi-Modal Reasoning | 20 | Temporal ACT: Vision + Language + History → Cross-Modal Transformer → Bimanual heads |
-| OpenVINO & Intel Core Ultra | 20 | INT8 PTQ via NNCF + NPU/iGPU auto-discovery + p95/p99 latency profiling |
-| Technical Quality | 10 | Conda + Docker + GitHub Actions CI + Config YAML + HDF5 data pipeline |
-| Innovation & Demo | 5 | Gradio UI + HUD video + 4 task suite + dynamic obstacle |
-| **Speechmatics Bonus** | **+Bonus** | Full Speechmatics Batch ASR API with polling + microphone UI |
+|----------|---------|-------------------|
+| Bimanual Task Completion | 25 | Dual SO-101 + hand-off detection + 4 task types + drawer manipulation + dynamic obstacle |
+| Robustness & Generalization | 15 | 6-axis domain randomization (position, mass, friction, lighting, shape, background) × 10 seeds |
+| VLA / Multi-Modal Reasoning | 20 | Real Sentence-Transformer embeddings + Temporal ACT + History encoder + Cross-Modal Transformer |
+| OpenVINO & Intel Core Ultra | 20 | INT8 PTQ via NNCF + NPU/iGPU auto-discovery + p50/p95/p99 latency profiling |
+| Technical Quality | 10 | Conda + Docker + Makefile + GitHub Actions CI + Config YAML + HDF5 pipeline + 39 pytest tests |
+| Innovation & Demo | 5 | Voice-to-Action + Robot TTS + EMA smoother + Foxglove dashboard + ablation notebook |
+| **Speechmatics Bonus** | **+Bonus** | Full Speechmatics Batch ASR API with job polling + live microphone Gradio UI |
 
 ---
 
@@ -249,27 +298,29 @@ Our Gradio dashboard includes a **live microphone widget** backed by the officia
 
 1. Record your voice command in the UI
 2. Audio is submitted to `asr.api.speechmatics.com/v2/jobs/`
-3. Job is polled until complete, returning an accurate English transcript
-4. Transcribed instruction is fed directly into the VLA policy
+3. Job is polled until `status == done`, returning an accurate English transcript
+4. Transcribed instruction is semantically embedded and fed directly into the VLA policy
+5. The robot executes the action and **speaks back** a TTS confirmation via gTTS
 
-This transforms our project into a true **Voice-to-Physical-Action** pipeline.
+This transforms our project into a true **Voice-to-Physical-Action** closed-loop pipeline.
 
 ---
 
-## 📋 Pre-Submission Checklist
+## 🧬 Model Card
 
-- [x] Reproducible repository (Conda + Docker + CI)
-- [x] MuJoCo dual-arm simulation with drawer and dynamic obstacle
-- [x] 6-axis domain randomization for robustness
-- [x] OpenVINO INT8 PTQ export + benchmark + latency profile
-- [x] Training + evaluation code with HDF5 data pipeline
-- [x] Teleoperation data collection pipeline
-- [x] Gradio Web UI with Speechmatics ASR
-- [x] ROS 2 deployment node
-- [x] Demo video uploaded → **[Watch on YouTube](https://www.youtube.com/watch?v=ugT-6m7i8ls)**
-- [x] Paste `benchmark_intel.py` results from Intel Core Ultra hardware here:
+See [`MODEL_CARD.md`](MODEL_CARD.md) for the full HuggingFace-compatible model card, including architecture details, training data description, evaluation results, limitations, and BibTeX citation.
+
+---
+
+## ⚡ Intel Core Ultra Benchmark Results
+
+Measured on Intel Core Ultra with OpenVINO Runtime:
 
 ```text
+=== Intel Core Ultra Device Discovery ===
+Detected Hardware Devices: ['CPU', 'GPU', 'NPU']
+=> AI NPU Detected. Prioritizing NPU for maximum energy-efficient throughput.
+
 === Official Benchmark Results ===
 Optimized Precision: INT8 (PTQ via NNCF)
 Target Device:       NPU
@@ -277,3 +328,30 @@ Average Latency:     11.72 ms
 Throughput:          85.34 FPS
 ==================================
 ```
+
+> **85 FPS** at INT8 precision on NPU — sufficient for real-time 30Hz robot control with **2.8x headroom**.
+
+---
+
+## 📋 Pre-Submission Checklist
+
+- [x] Reproducible repository (Conda + pip + Docker + Makefile + CI)
+- [x] MuJoCo dual-arm simulation with drawer and dynamic obstacle
+- [x] 6-axis domain randomization across 10 seeds for robustness
+- [x] Multi-stage FSM reward (`simulation/reward.py`) replacing binary heuristic
+- [x] Real Sentence-Transformer language embeddings (`models/language_encoder.py`)
+- [x] OpenVINO INT8 PTQ export + NPU benchmark + p50/p95/p99 latency profile
+- [x] Training + evaluation code with HDF5 data pipeline
+- [x] Teleoperation data collection pipeline
+- [x] 39-test pytest suite — all passing ✅
+- [x] Ablation study notebook (`notebooks/ablation_study.ipynb`)
+- [x] HuggingFace Model Card (`MODEL_CARD.md`)
+- [x] EMA kinematic action smoother (`models/action_filter.py`)
+- [x] Foxglove Studio telemetry dashboard (`deployment/foxglove_layout.json`)
+- [x] Gradio Web UI with Speechmatics ASR + Robot TTS voice
+- [x] ROS 2 deployment node (`deployment/ros2_vla_node.py`)
+- [x] Demo video uploaded → **[Watch on YouTube](https://www.youtube.com/watch?v=ugT-6m7i8ls)**
+
+---
+
+**Intel Physical AI Challenge** | lablab.ai · 2026 · *Speechmatics Bonus Track integrated*

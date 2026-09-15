@@ -82,7 +82,9 @@ class VLAPolicy(nn.Module):
             dim_feedforward=feature_dim * 4,
             dropout=dropout, batch_first=True, norm_first=True
         )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.transformer = nn.TransformerEncoder(
+            encoder_layer, num_layers=num_layers, enable_nested_tensor=False
+        )
 
         # Bimanual action head (separate heads for left/right arms for better specialization)
         self.left_arm_head  = nn.Linear(feature_dim, action_dim // 2)

@@ -8,6 +8,7 @@
 ![MuJoCo](https://img.shields.io/badge/Simulation-MuJoCo-orange?style=for-the-badge)
 ![LeRobot](https://img.shields.io/badge/Policy-LeRobot_ACT-FF5733?style=for-the-badge)
 ![Speechmatics](https://img.shields.io/badge/Bonus-Speechmatics_ASR-1ABC9C?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-14%20Passed-brightgreen?style=for-the-badge&logo=pytest)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions)
 
 ### 🎬 Full Demo Video (10 Seeds · OpenVINO · Speechmatics Bonus)

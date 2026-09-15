@@ -39,7 +39,12 @@ def get_encoder(model_name: str = DEFAULT_MODEL):
         from sentence_transformers import SentenceTransformer
         print(f"[LangEncoder] Loading '{model_name}' ...")
         _encoder = SentenceTransformer(model_name)
-        _dim = _encoder.get_sentence_embedding_dimension()
+        # get_embedding_dimension() is the new API; fall back for older versions
+        _dim = (
+            _encoder.get_embedding_dimension()
+            if hasattr(_encoder, "get_embedding_dimension")
+            else _encoder.get_sentence_embedding_dimension()
+        )
         print(f"[LangEncoder] Ready — embedding dim={_dim}")
     except ImportError:
         print("[LangEncoder] sentence-transformers not installed. "
